@@ -1,7 +1,7 @@
-# SlepyAI
+# RestyAI
 
 ## Overview
-The Sleep Pattern Analyzer is a Streamlit-based web application designed to help users analyze their sleep patterns and gain insights into their sleep quality. By uploading a CSV file containing sleep data, users can visualize trends, calculate sleep metrics, and detect potential sleep disorders.
+RestyAI is a Streamlit-based web application designed to help users analyze their sleep patterns and gain insights into their sleep quality. By uploading a CSV file containing sleep data, users can visualize trends, calculate sleep metrics, and detect potential sleep disorders.
 
 ## Features
 - **CSV File Upload**: Upload your sleep data in CSV format.
