@@ -26,6 +26,20 @@ def main():
     st.title("🌙 Sleep Pattern Analyzer")
     st.write("Upload your sleep data to analyze patterns and get insights")
 
+    # Add custom CSS for table styling
+    st.markdown("""
+        <style>
+        table {
+            color: #FAFAFA !important;
+            border: 0.5px solid #FAFAFA !important;
+        }
+        th, td {
+            color: #FAFAFA !important;
+            border: 0.5px solid #FAFAFA !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     # Show CSV format instructions
     with st.expander("📝 CSV File Format Instructions"):
         st.write("""
@@ -47,15 +61,19 @@ def main():
 
     # File upload
     uploaded_file = st.file_uploader(
-        "Upload your sleep data CSV file",
-        type=['csv'],
-        help="Upload a CSV file with columns: date, sleep_start, sleep_end, quality"
+        "Upload your sleep data file (CSV or Excel)",
+        type=['csv', 'xlsx'],
+        help="Upload a CSV or Excel file with columns: date, sleep_start, sleep_end, quality"
     )
 
     if uploaded_file is not None:
         try:
             # Read and validate data
-            df = pd.read_csv(uploaded_file)
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            else:
+                df = pd.read_excel(uploaded_file)
+                
             if validate_data(df):
                 # Process data
                 processed_df = process_sleep_data(df)
@@ -137,7 +155,8 @@ def main():
 
                     with col2:
                         st.write("📉 Distribution Analysis")
-                        st.json(stats['Sleep Duration']['Distribution Analysis'])
+                        distribution_df = pd.DataFrame.from_dict(stats['Sleep Duration']['Distribution Analysis'], orient='index', columns=['Value'])
+                        st.table(distribution_df)
 
                 # Weekly Sleep Patterns Bar Chart
                 weekly_patterns = stats['Sleep Patterns']['Weekly Patterns']
@@ -203,20 +222,24 @@ def main():
                     col1, col2 = st.columns(2)
                     with col1:
                         st.write("📊 Quality Statistics")
-                        st.json(stats['Sleep Quality']['Summary Statistics'])
+                        quality_stats_df = pd.DataFrame.from_dict(quality_stats, orient='index', columns=['Value'])
+                        st.table(quality_stats_df)
                     with col2:
                         st.write("🎯 Quality Distribution")
-                        st.json(stats['Sleep Quality']['Quality Distribution'])
+                        quality_dist_df = pd.DataFrame.from_dict(quality_dist, orient='index', columns=['Nights'])
+                        st.table(quality_dist_df)
 
                 # Sleep Patterns
                 with st.expander("🔄 Sleep Patterns", expanded=True):
                     col1, col2 = st.columns(2)
                     with col1:
                         st.write("⏰ Timing Analysis")
-                        st.json(stats['Sleep Patterns']['Timing Analysis'])
+                        timing_analysis_df = pd.DataFrame.from_dict(stats['Sleep Patterns']['Timing Analysis'], orient='index', columns=['Value'])
+                        st.table(timing_analysis_df)
                     with col2:
                         st.write("📅 Weekly Patterns")
-                        st.json(stats['Sleep Patterns']['Weekly Patterns'])
+                        weekly_patterns_df = pd.DataFrame.from_dict(stats['Sleep Patterns']['Weekly Patterns'], orient='index', columns=['Value'])
+                        st.table(weekly_patterns_df)
 
                 # Correlations and Interpretations
                 with st.expander("🔍 Analysis Insights", expanded=True):
@@ -236,7 +259,7 @@ def main():
                 disorder_analysis = detector.analyze_sleep_patterns(processed_df)
 
                 # Display disorder analysis results
-                if disorder_analysis['detected_disorders']:
+                if (disorder_analysis['detected_disorders']):
                     st.warning("Potential sleep disorders detected. Please consult a healthcare professional for proper diagnosis.")
 
                     for disorder in disorder_analysis['detected_disorders']:
